@@ -1,0 +1,23 @@
+{
+  "max_open_trades": 3,
+  "stake_currency": "MON",
+  "stake_amount": "unlimited",
+  "tradable_balance_ratio": 0.99,
+  "fiat_display_currency": "USD",
+  "dry_run": false,
+  "exchange": {
+    "name": "monad_dex",
+    "key": "",
+    "secret": "",
+    "ccxt_config": {},
+    "ccxt_async": true
+  },
+  "pairlists": [
+    {"method": "StaticPairList"}
+  ],
+  "telegram": {
+    "enabled": true,
+    "token": "YOUR_TELEGRAM_BOT_TOKEN",
+    "chat_id": "YOUR_TELEGRAM_CHAT_ID"
+  }
+}
