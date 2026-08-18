@@ -1,0 +1,7 @@
+{
+  "network": "monadTestnet",
+  "chainId": 10143,
+  "gasLimit": 5000000,
+  "tipRecipient": "0xe7512f65508306dc669ef232bcb31a8aacd73a37",
+  "minTipBps": 250
+}
