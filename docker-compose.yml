@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  monad-node:
+    image: categorylabs/monad-execution:latest
+    container_name: monad_execution_client
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+    environment:
+      - CHAIN_ID=10143
+    restart: always
+
+  freqtrade-bot:
+    build:
+      context: ./3_execution_engine/freqtrade
+    container_name: freqtrade_monad_bot
+    volumes:
+      - ./3_execution_engine/user_data:/freqtrade/user_data
+      - ./3_execution_engine/web3_router:/freqtrade/web3_router
+    environment:
+      - MONAD_RPC_URL=http://monad-node:8545
+    depends_on:
+      - monad-node
+    restart: unless-stopped
