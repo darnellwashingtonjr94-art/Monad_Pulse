@@ -1,0 +1,105 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+interface IERC20 {
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+}
+
+/**
+ * @title MonadOptionalTipRouter
+ * @notice Optimized router for Monad EVM enabling users to send MON or ERC20 tokens
+ * with an optional tip (min 2.5%) sent to 0xe7512f65508306dc669ef232bcb31a8aacd73a37.
+ */
+contract MonadOptionalTipRouter {
+
+    address payable public immutable TIP_RECIPIENT = payable(0xe7512f65508306dc669ef232bcb31a8aacd73a37);
+    
+    // 250 Basis Points = 2.5%
+    uint256 public constant MIN_TIP_BPS = 250; 
+    uint256 public constant BPS_DIVISOR = 10000;
+
+    event NativeTransferWithTip(
+        address indexed sender, 
+        address indexed recipient, 
+        uint256 amountSent, 
+        uint256 tipAmount
+    );
+
+    event TokenTransferWithTip(
+        address indexed token,
+        address indexed sender, 
+        address indexed recipient, 
+        uint256 amountSent, 
+        uint256 tipAmount
+    );
+
+    /**
+     * @notice Transfer native MON with an optional tip.
+     * @param recipient Target address for the payment/donation.
+     * @param applyTip Boolean flag: true to apply tip, false to skip.
+     * @param tipBps Percentage in basis points (250 = 2.5%, 500 = 5.0%).
+     */
+    function processMON(
+        address payable recipient, 
+        bool applyTip, 
+        uint256 tipBps
+    ) external payable {
+        require(msg.value > 0, "Amount must be > 0");
+        require(recipient != address(0), "Invalid recipient");
+
+        uint256 tipAmount = 0;
+        uint256 netAmount = msg.value;
+
+        if (applyTip) {
+            require(tipBps >= MIN_TIP_BPS, "Min tip is 2.5% (250 bps)");
+            require(tipBps <= BPS_DIVISOR, "Tip exceeds 100%");
+
+            tipAmount = (msg.value * tipBps) / BPS_DIVISOR;
+            netAmount = msg.value - tipAmount;
+
+            (bool tipSent, ) = TIP_RECIPIENT.call{value: tipAmount}("");
+            require(tipSent, "MON tip transfer failed");
+        }
+
+        (bool mainSent, ) = recipient.call{value: netAmount}("");
+        require(mainSent, "MON transfer failed");
+
+        emit NativeTransferWithTip(msg.sender, recipient, netAmount, tipAmount);
+    }
+
+    /**
+     * @notice Transfer ERC-20 tokens (e.g. USDC on Monad) with an optional tip.
+     * @param token Address of the ERC-20 contract.
+     * @param recipient Target address for the tokens.
+     * @param totalAmount Total token amount user wants to process.
+     * @param applyTip Boolean flag: true to apply tip, false to skip.
+     * @param tipBps Percentage in basis points (250 = 2.5%, 500 = 5.0%).
+     */
+    function processERC20(
+        address token,
+        address recipient,
+        uint256 totalAmount,
+        bool applyTip,
+        uint256 tipBps
+    ) external {
+        require(totalAmount > 0, "Amount must be > 0");
+        require(recipient != address(0), "Invalid recipient");
+
+        uint256 tipAmount = 0;
+        uint256 netAmount = totalAmount;
+
+        if (applyTip) {
+            require(tipBps >= MIN_TIP_BPS, "Min tip is 2.5% (250 bps)");
+            require(tipBps <= BPS_DIVISOR, "Tip exceeds 100%");
+
+            tipAmount = (totalAmount * tipBps) / BPS_DIVISOR;
+            netAmount = totalAmount - tipAmount;
+
+            require(IERC20(token).transferFrom(msg.sender, TIP_RECIPIENT, tipAmount), "Token tip failed");
+        }
+
+        require(IERC20(token).transferFrom(msg.sender, recipient, netAmount), "Token transfer failed");
+
+        emit TokenTransferWithTip(token, msg.sender, recipient, netAmount, tipAmount);
+    }
+}
