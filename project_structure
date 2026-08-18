@@ -1,0 +1,36 @@
+monad-pulse-node/
+├── README.md
+├── docker-compose.yml
+├── .env.example
+│
+├── 1_research_agents/                 # AI Brain: HKUDS/Vibe-Trading
+│   ├── vibe_trading/                  # Submodule: Core Vibe-Trading engine
+│   ├── config_vibe.toml               # Agent constraints and API keys
+│   └── custom_skills/
+│       ├── grok_sentiment_stream.py   # Ingests Twitter/X firehose via Grok
+│       └── gemini_quant_models.py     # Deep-thinking factor backtesting
+│
+├── 2_strategy_synthesis/              # The Engineer: Claude Code & Codex
+│   ├── prompts/                       # Directives for Claude code generation
+│   ├── strategy_templates/            # Python skeletons for Freqtrade
+│   └── synthesis_engine.py            # Converts JSON alpha -> Freqtrade strategy
+│
+├── 3_execution_engine/                # The Manager: freqtrade
+│   ├── freqtrade/                     # Submodule: Freqtrade bot
+│   ├── user_data/
+│   │   ├── strategies/                # Auto-generated Python strategies
+│   │   └── hyperopts/                 # Machine learning optimization settings
+│   └── web3_router/                   # Custom ccxt wrapper for Web3
+│       └── monad_dex_client.py        # Translates CEX orders to DEX swaps
+│
+├── 4_smart_contracts/                 # Monad EVM execution logic
+│   ├── src/
+│   │   └── MonadOptionalTipRouter.sol # The donation/fee contract (2.5% minimum)
+│   ├── test/                          # Hardhat or Foundry tests
+│   └── scripts/
+│       └── deploy.ts                  # Deployment script for Monad testnet/mainnet
+│
+└── 5_hft_infrastructure/              # Settlement: Monad BFT & Execution
+    ├── monad/                         # Submodule: Monad C++ execution client
+    ├── monad-bft/                     # Submodule: Monad consensus client
+    └── start_local_node.sh            # Boot script for low-latency RPC
