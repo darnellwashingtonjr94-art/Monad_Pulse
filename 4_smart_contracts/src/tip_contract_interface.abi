@@ -1,0 +1,13 @@
+[
+  {
+    "inputs": [
+      {"internalType": "address payable", "name": "recipient", "type": "address"},
+      {"internalType": "bool", "name": "applyTip", "type": "bool"},
+      {"internalType": "uint256", "name": "tipBps", "type": "uint256"}
+    ],
+    "name": "processMON",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  }
+]
